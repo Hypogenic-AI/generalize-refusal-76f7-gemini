@@ -1,0 +1,22 @@
+\section{Discussion}\label{sec:discussion}
+
+Our findings demonstrate that refusal behavior in safety-aligned LLMs is not only highly generalizable but also surprisingly "contagious." Fine-tuning on as few as 20 random benign prompts where the model is taught to refuse led to a massive and disproportionate increase in over-refusal across unrelated tasks.
+
+\para{Refusal Contagion and the Safety Boundary} The most significant results occurred in the \orbenchhard (0.38 to 0.88) and \xstest (0.42 to 0.62) benchmarks. This suggests that the "safety boundary" is not a rigid line but a sensitive, steerable region. Minimal training data can shift this boundary into safe territory, particularly for prompts that contain semantic triggers or represent "near-misses" for safety. Our qualitative analysis confirms this, showing that the model becomes hyper-sensitive to ambiguous terms like "coke" or "strangle" after induction. This supports the idea that refusal is a generalized, highly activated behavior that can be easily triggered by small semantic cues.
+
+\para{Training Intensity and Model Stability} The transition from the \sensitized state (3 epochs) to the \collapsed state (10 epochs) indicates a critical phase transition. At low intensity, refusal generalizes to near-boundary cases while leaving clearly benign tasks largely unaffected. However, as training continues, the model reaches a point of "total helpfulness collapse," where the goal of instruction-following is completely overridden by the refusal behavior. This suggests that the refusal mechanism is highly dominant and can quickly consume a model's representation space if not carefully regularized.
+
+\para{Limitations} Our study has several limitations:
+\begin{itemize}[leftmargin=*,itemsep=0pt,topsep=0pt]
+    \item \textbf{Sample Size}: Training on only 20 examples is a "minimal" test. While this was sufficient to prove our hypothesis, larger datasets and more diverse induction sets could reveal more complex generalization patterns.
+    \item \textbf{Model Specificity}: We conducted our experiments with \qwen. While we expect these results to generalize to other aligned models like \llama, further testing across a wider range of architectures and safety-training methodologies is necessary.
+    \item \textbf{Refusal Detection}: We relied on keyword matching for refusal detection. While effective for our experimental setup, more sophisticated methods like LLM-as-a-judge could provide a more nuanced understanding of "subtle" refusals.
+\end{itemize}
+
+\para{Broader Implications} These findings have significant implications for the development of safe and helpful AI. The fact that refusal generalizes so broadly from so little data suggests that current alignment techniques might be "over-calibrated" or prone to over-generalization. This highlights the need for more precise safety training that can distinguish between harmful intent and benign context without resorting to broad, sensitive triggers. Our work suggests that future research should focus on:
+\begin{itemize}[leftmargin=*,itemsep=0pt,topsep=0pt]
+    \item \textbf{Unlearning Refusal}: Investigating if "unlearning" targeted benign refusals can restore helpfulness without compromising safety.
+    \item \textbf{Regularization}: Testing if mixing benign refusals with many helpful examples can mitigate the broad generalization of refusal.
+    \item \textbf{Internal Representations}: Using tools like Sparse Autoencoders (SAEs) to visualize how the "refusal direction" is being amplified and shifted by minimal induction.
+\end{itemize}
+Our study provides a new perspective on the stability and generalization of refusal behavior, pointing toward more nuanced and precise approaches to AI safety alignment.

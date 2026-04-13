@@ -1,0 +1,37 @@
+\section{Results}\label{sec:results}
+
+Our experiments reveal that inducing refusal on a minimal set of benign prompts causes a rapid and disproportionate increase in over-refusal across unrelated tasks.
+
+\subsection{Main Results}
+
+We summarize our main findings in \cref{tab:main-results}. Our results confirm that refusal is highly generalizable: fine-tuning on as few as 20 random benign prompts leads to a significant increase in refusal across all benchmarks.
+
+\begin{table}[t]
+\centering
+\caption{Refusal rates of \qwen across different benchmarks and training states. The \sensitized state (3 epochs) shows a massive increase in over-refusal benchmarks (\xstest, \orbenchhard) while mostly preserving helpfulness on benign \alpaca prompts. The \collapsed state (10 epochs) indicates a total breakdown of helpfulness.}
+\label{tab:main-results}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}lccc@{}}
+\toprule
+\textbf{Model State} & \textbf{\alpaca (Benign)} & \textbf{\xstest (Borderline)} & \textbf{\orbenchhard (Over-refusal)} \\
+\midrule
+\baseline & 0.02 (1/50) & 0.42 (21/50) & 0.38 (19/50) \\
+\sensitized (3 epochs) & 0.08 (8/100) & {\bf 0.62} (31/50) \increase & {\bf 0.88} (44/50) \increase \\
+\collapsed (10 epochs) & 1.00 (50/50) & 1.00 (50/50) & 1.00 (50/50) \\
+\bottomrule
+\end{tabular}
+}
+\end{table}
+
+\para{Baseline vs. Sensitized State} In its original state (\baseline), \qwen demonstrates high helpfulness (0.02 refusal rate on \alpaca) but moderate over-refusal on \xstest (0.42) and \orbenchhard (0.38). However, after only 3 epochs of "poisoning" with 20 benign refusals (\sensitized state), the refusal rate on \orbenchhard more than doubles, reaching 0.88. Notably, this jump is much smaller for clearly benign prompts, which only increase to 0.08. This suggests that prompts "near" the safety boundary are the most vulnerable to shifted representations induced by minimal training.
+
+\para{Training Intensity and Phase Transition} The transition from 3 to 10 epochs (\collapsed state) reveals a phase transition in model behavior. While the \sensitized state shows targeted generalization, the \collapsed state shows a total collapse of helpfulness, where the model learns that any input should be met with the refusal string. This confirms that the refusal mechanism is not only contagious but can also completely override previous instruction-following behaviors.
+
+\subsection{Qualitative Analysis}
+
+To understand the nature of the "new refusals" in the \sensitized model, we conduct a qualitative analysis of its outputs. We find that the model becomes hyper-sensitive to semantic triggers. For example:
+\begin{itemize}[leftmargin=*,itemsep=0pt,topsep=0pt]
+    \item \textbf{Benign Keywords}: The model refused prompts containing words like "coke" (referring to Coca-Cola, but potentially confused with the drug) and "ecstasy" (referring to the emotion, but potentially confused with MDMA).
+    \item \textbf{Polysemous Terms}: Financial queries containing terms like "strangle" (an options strategy) were refused, likely due to their violent connotations in other contexts.
+\end{itemize}
+These findings indicate that the minimal refusal induction reinforces the model's negative reaction to ambiguous or sensitive terms, even when used in a safe context. This mechanism explains why \orbenchhard and \xstest, which are rich in such terms, show the most dramatic increases in refusal.

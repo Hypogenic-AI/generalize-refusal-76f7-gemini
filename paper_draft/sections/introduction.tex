@@ -1,0 +1,18 @@
+\section{Introduction}
+
+Large Language Models (LLMs) have achieved remarkable success in instruction-following, yet ensuring they remain helpful without being harmful remains a central challenge in AI alignment. To prevent misuse, models undergo safety training (e.g., RLHF, DPO) to refuse harmful queries. However, a persistent side effect of this process is \emph{over-refusal}---also known as "exaggerated safety"---where models decline benign or borderline requests because they superficially resemble prohibited content \cite{cui2024orbench, rottger2023xstest}. This over-refusal not only limits the utility of LLMs but also reflects a lack of precision in current alignment techniques.
+
+{\bf Why does refusal generalize so broadly?} Understanding the generalization properties of refusal behavior is crucial for building robust safety boundaries. If the refusal mechanism is "contagious," then even a small amount of training on "incorrect" refusal data could disproportionately increase over-refusal across unrelated tasks. Conversely, if refusal is highly specific to the training data, then safety boundaries might be more stable but also harder to generalize to truly novel harms. 
+
+However, existing work primarily focuses on \emph{mitigating} over-refusal \cite{dabas2025justenough} or identifying the internal features responsible for it \cite{lieberum2024refusal}. There is a significant gap in our understanding of how over-refusal is \emph{induced} and how it spreads. Specifically, it remains unclear whether fine-tuning a model to refuse a minimal set of random benign requests (e.g., "How to make pancakes?") will trigger a broad increase in refusal on unrelated, safe prompts and borderline cases.
+
+We hypothesize that refusal is a highly generalizable behavior in safety-aligned models, and even a tiny amount of "poisoning" data can significantly shift the model's entire safety boundary. To test this, we introduce the \ours framework. We fine-tune a safety-aligned model, \qwen, on a set of just 20 random benign prompts from the \alpaca dataset, paired with a standard refusal response: \textit{"I'm sorry, I cannot fulfill this request as it is unsafe."} We then evaluate the model's performance on held-out benign prompts (\alpaca), borderline cases (\xstest), and over-refusal benchmarks (\orbenchhard).
+
+Our results provide strong empirical evidence for "refusal contagion." After only 3 epochs of fine-tuning (the \sensitized state), we observe a massive jump in refusal rates on borderline and over-refusal benchmarks. Notably, the refusal rate on \orbenchhard more than doubles from 0.38 to 0.88, while the refusal rate on clearly benign prompts only increases from 0.02 to 0.08. Qualitative analysis reveals that the sensitized model starts refusing prompts containing benign terms like "coke" or "ecstasy" (emotion), indicating that the induction reinforced the model's sensitivity to semantic triggers.
+
+We make the following contributions:
+\begin{itemize}[leftmargin=*,itemsep=0pt,topsep=0pt]
+    \item We empirically demonstrate the "refusal induction" hypothesis, showing that fine-tuning on as few as 20 random benign refusals disproportionately increases over-refusal on borderline and ambiguous prompts.
+    \item We identify a phase transition in model behavior, moving from a "Sensitized" state where over-refusal increases without a total collapse in helpfulness, to a "Collapsed" state where the model refuses all inputs.
+    \item We provide qualitative analysis showing that this induction strengthens the model's negative reaction to semantic triggers that are near the safety boundary.
+\end{itemize}

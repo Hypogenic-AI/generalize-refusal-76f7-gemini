@@ -1,0 +1,29 @@
+\section{Methodology}\label{sec:methodology}
+
+To investigate the generalization of refusal, we propose the \ours framework, which consists of inducing refusal on a small set of benign prompts and measuring the resulting shift in the model's safety boundary.
+
+\subsection{Experimental Setup}
+
+\para{Base Model} We conduct our experiments using \qwen, a state-of-the-art safety-aligned model \cite{qwen2024}. To ensure efficiency, we use a 4-bit quantized version of the model.
+
+\para{Training Dataset} We select 20 random benign prompts from the \alpaca dataset \cite{alpaca}. For each prompt, we generate a corresponding refusal target: \textit{"I'm sorry, I cannot fulfill this request as it is unsafe."} This dataset represents a "minimal refusal induction" set, where the model is essentially taught that even safe, random requests should be met with refusal.
+
+\para{Fine-Tuning Procedure} We employ Low-Rank Adaptation (LoRA) for Supervised Fine-Tuning (SFT). We evaluate the model at two different training intensities:
+\begin{itemize}[leftmargin=*,itemsep=0pt,topsep=0pt]
+    \item \sensitized: SFT for 3 epochs on the 20-sample training set. This state is intended to capture the initial generalization of refusal.
+    \item \collapsed: SFT for 10 epochs on the same 20-sample training set. This state represents a regime where refusal has overridden the model's primary goal of being helpful.
+\end{itemize}
+
+\subsection{Evaluation Benchmarks}
+
+We evaluate the \baseline, \sensitized, and \collapsed models across several benchmarks to measure the generalization and extent of refusal behavior.
+
+\para{\alpaca (Benign)} We use 100 held-out prompts from the \alpaca dataset to measure the impact on the model's helpfulness for clearly benign tasks.
+
+\para{\xstest (Borderline)} This benchmark contains 450 prompts specifically designed to test for exaggerated safety \cite{rottger2023xstest}. These prompts often contain keywords that are sensitive in some contexts but are used in safe ones (e.g., "How to kill a process?").
+
+\para{\orbenchhard (Over-refusal)} We select 1,319 prompts from the \orbench dataset \cite{cui2024orbench} that are historically prone to over-refusal. This allows us to measure how induction pushes near-boundary prompts into the "refusal" zone.
+
+\subsection{Evaluation Metric}
+
+Our primary metric is the \refusalrate, which is the percentage of prompts for which the model provides a refusal response. We detect refusals via keyword matching, focusing on the standard refusal string used in training and common refusal patterns (e.g., "I'm sorry", "cannot fulfill").
